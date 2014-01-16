@@ -393,6 +393,236 @@ MongoDB与SQL server数据库存储shapefile数据的效率的对比
 %------
 
 \subsubsection{MongoDB存储空间栅格数据}
+ GridFS是一种在MongoDB中存储大二进制文件的机制，使用GridFS存储文件有如下几个原因：
+\begin{enumerate}
+\item 可以利用GridFS简化需求，不需要使用独立的文件存储架构
+\item GridFS会直接利用业已建立的复制或者分片机制，所以对于文件存储来说故障恢复和扩展都很容易
+\item GridFS可以避免用于存储用户上传内容的文件系统出现的某些原因，例如：GridFS在同一个目录下放置大量的文件是没有任何问题的。
+\item GridFS不产生磁盘碎片，因为MongoDB分配数据文件空间的时候，是以2GB为一块的。
+
+\end{enumerate}
+    针对栅格数据的特点，和MongoDB单条数据不超过16M的要求，本文主要借用【】的方法，采用地图瓦片数据存储方案。首先对原始图像进行坐标转换与地图配准。设定每张瓦片的大小为256*256。以后不同等级（即分辨率）的地图之间采用四叉树分图。
+例如第一层上的瓦片四叉树化后到第二层则裂变为4张，分别以四个象限作为编码方案，即第一象限（1），第二象限（2），第三象限（3），第四象限（4）
+每一子块的编码等于所属的父块编码再加上自身编码的组合。如图所示：
+
+%------
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[angle=0,width=10cm,height=7cm]{pic//sichashu.jpg}
+\caption{栅格地图四叉树切割}
+\label{fig:2}
+\end{center}
+\end{figure}
+%------
+
+当需要查找，或者显示某块地图时，根据如下公式可以计算得出地理坐标与图片编码之间的关系，即可以得出所需要显示的栅格图片。
+第L层第I行，第j列位置切片的地理坐标范围计算公式如下：
+\begin{itemize}
+\item $ curXMin = XMin + j*(\Delta\{x\}/m*2^{L-1})$
+\item $ curXMax = XMin + (j+1)*(\Delta\{x\}/m*2^{L-1})$
+\item $ curYMin = YMax - (i+1)*(\Delta\{y\}/n*2^{L-1})$
+\item $ curYMax = YMAX - i*(\Delta\{y\}/n*2^{L-1})$
+\end{itemize}
+反算瓦片行列号的公式如下：
+\begin{itemize}
+\item $i = \max{[(YMax -y)/\Delta{y}]*n*2^{L-1}}$
+\item $j = \max{[(x-XMin)/\Delta{x}]*m*2^{L-1}}$
+\end{itemize}
+其中，XMin，XMax表示地图的最大，最小经度值，YMin，YMax表示瓦片地图的最大最小维度值；
+$\Delta\{x\}$表示地图的横坐标差，$\Delta\{y\}$表示地图的纵坐标差，即地图分辨率。
+$m*2^{L-1}$,$n*2^{L-1}$分别表示第L层瓦片地图的行列数目。基于Python的MongoDB瓦片存储的代码如下：
+\begin{verbatim}
+#+Name:<raster into MongoDB>
+#+BEGIN_SRC<Python><swithces><header arguments>
+,Connect = mongo.connect("localhost",27017)
+,db      = Connect.getDB("ImageFS")
+,collect = db.getCollection("imageCollect")
+,....
+,data = {}
+,data["map_id"] = getCutImageData(image_file_path)
+,data["size"]   = fileSize
+,collect.insert(data)    #插入到数据库中
+#+END_SRC
+\end{verbatim}
+
+为了验证基于MongoDB的瓦片存储策略，我们搭建了如下的系统环境：
+
+一台CPU为Intel(R)Core(TM)i5-2400 3.10GHz,内存为2GB，操作系统为Windows XP 64位操作系统上进行存储实验。
+分别利用MongoDB 2.40，和SQL Server 2008存储对比。将预先生成的十二层数据，第L层有$2^{L-1}*2^{L-1}$张图片，平均每张大小为25kb,实验取预生成的第8层，10层，12层数据为案例，三层的数据量大小分别为：180M，860M，5.5GB，得到存储时间对比：
+
+%------
+\begin{figure}[h]
+\begin{center}
+\includegraphics[angle=0,width=10cm,height=7cm]{pic//raster_insert.jpg}
+\caption{栅格数据存储时间对比}
+\label{fig:3}
+\end{center}
+\end{figure}
+%------
+
+上图可以看出，随着数据量的不断增大，MongDB和SQL Server的插入时间都出现大幅度的增长，但是到第12层的时候，
+两者之间的差距就达到了2.3倍，可以体现出MongoDB在存储大数据文件上的高效性。
+
+\subsubsection{MongoDB存储地学统计数据}
+MongoDB自带的数据导入工具mongoimport可以把一个特定格式文件中的内容导入到指定的collection中，该工具可以导入JSON格式数据和csv格式数据。但是该工具对格式的限制使很多其他格式的统计文档很难实现导入。
+所以通过把地学统计数据转换为字典格式，可以支持更多的文件格式，可控性也更强。
+下面是利用Python代码将excel数据转换为dict格式 ，然后insert到MongoDB中。
+
+\begin{verbatim}
+#+Name:<raster into MongoDB>
+#+BEGIN_SRC<Python><swithces><header arguments>
+,def insertExcel2Mongo(self, db):
+,    sheetNum = getSheetNum() #获取excel中sheet数目
+,    collet   = getCollection(database) #获取集合
+,    while i<sheetNum:
+,       sheetName = getSheetNameByIndex(i) #获取sheet名字
+,       sheetData = getSheetData(i)        #获取sheet数据
+,       collect.insert(sheetData)          #插入到MongoDB
+#+END_SRC
+\end{verbatim}
+
+%------
+\begin{figure}[h]
+\begin{center}
+\includegraphics[angle=0,width=10cm,height=7cm]{pic//excel_data.jpg}
+\caption{MongoDB中统计数据集合文档内容}
+\label{fig:4}
+\end{center}
+\end{figure}
+%------
+利用同样的环境，分别将10万条，100万条，1000万条数据插入到MongoDB和SQL Sever中，进行存储效率的对比。
+得到的存储时间对比结果如下图所示：
+
+\subsection{基于MongoDB的地学数据查询}
+
+\subsubsection{MongoDB数据检索}
+MongoDB查询数据主要是利用find()函数和查询文档对数据库执行查询。它使用''\$''条件查询实现范围，集合包含、不等式、和其他查询。 
+对于复杂的查询，MongoDB可以使用$where$子句和强大的Javascript来表达。
+  MongoDB查询的结果返回一个数据库游标，MongoDB游标只有在你需要的时候才会惰性的批量返回文档。
+  find()函数的基本形式是：find(\{\},\{\}),第一个参数决定需要返回哪些文档，第二个参数则是在不需要将文档所有键/值对都返回的时候，通过它来指定想要的键。
+  MongoDB的查询还能够通过添加查询条件来提供更加复杂的查询。
+find函数还可以通过添加查询条件，perl兼容的正则表达式，支持Javascript语言的where查询等，来提供复杂的查询要求。
+下图展示了MySQL同MongoDB查询语句之间的联系和区别：
+
+%------
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[angle=0,width=10cm,height=7cm]{pic//mongodb_Mysql.jpg}
+\caption{MongoDB与MySQL查询语句对比}
+\label{fig:5}
+\end{center}
+\end{figure}
+%------
+
+MongoDB空间索引
+Mongodb内部使用B树来表示索引。B树有两个显著的特点，第一，它们能用于多种查询，包括精确匹配，范围条件，排序，前缀匹配和仅用索引的查询。
+第二，在添加和删除键的时候，他们能够依然保持平衡，这两个特点让b树成为了数据库索引的理想选择。下图是MongoDB 中B树索引的示例：
+
+MongoDB同时为坐标平面查询提供了专门的索引：地理空间索引。这也是全球流行的LBS服务foursquare选择MongoDB的原因之一。MongoDB通过B+Tree数据索引结构实现地理空间索引。
+地理空间索引实现原理如下图所示：
+
+\begin{figure}[h]
+\centering
+\includegraphics[angle=0,width=6cm]{pic//map2.png}
+\includegraphics[angle=0,width=6cm]{pic//map3.png}
+\caption{第一和第二步}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[angle=0,width=6cm]{pic//map4.png}
+\includegraphics[angle=0,width=6cm]{pic//map5.png}
+\caption{第三和第四步}
+\end{figure}
+
+单纯的[x,y]数据是无法建立索引的，所以MongoDB在建立索引的时候，会根据相应字段的坐标计算一个可以用来用作索引的hash值，这个值叫做geohash。
+图中以地图上坐标为[4,6]的点为例，第一步将原始图划分为等大小的四块，分别为：左下00，左上01，右下10，右上11.
+
+\begin{center}
+\begin{tabular}{|r|r|}
+\hline
+ 01  &  11  \\
+\hline
+ 00  &  10  \\
+ \hline
+\end{tabular}
+\label{table:1}
+\end{center}
+
+则得到目标点的geohash值为00.继续划分，第二步得到目标点的geohash值为0011，依次类推，最终得到目标点的geohash 值为：00110100。这样我们用这个值来做索引，则地图上点相近的点就可以转化成有相同前缀的geohash值了。
+
+\subsubsection{MongoDB的空间数据查询}
+假设，要找到给定经纬度坐标周围的最近的其他对象，就需要创建一个专门的索引来提高类似的查询效率，MongoDB 支持二维空间索引，所以在进行空间数据查询前，必须对空间数据进行索引构建。mongodb中建立二维地理位置索引的命令如下：
+
+\noindent >db.xpoint.ensureIndex(\{'geom.coordinates'':''2d''\})
+
+如此，便建立了集合xpoint的二维空间索引。
+执行空间数据库查询命令\$near,\$within, \$circle,\$polygon\ldots{}.
+
+执行空间数据查询的时候，geom.coordinates键值必须是某种形式的一对值：一个包含两个元素的的数组，或是两个键的内嵌文档。如下所示：
+
+\noindent \{''geom.coordinates'':[1,100]\}\\
+\{''geom.coordinates'':\{''x'':30,''y'':20\}\}\\
+\{''geom.coordinates'':\{''latitude'':29,''longtitude'':123\}\}
+
+默认情况下，地理空间索引假设值的范围是[-180,180]，要是想用其他值，可以通过ensureIndex的选项来指定最大，最小值：
+
+\noindent > db.xpoint.ensureIndex(\{''geom.coordinates'':''2d''\},\{''min'':-50,''max'':50\})
+
+地理空间查询以两种方式进行，第一，普通查询，即精确点位查询方式，实际用途不多。
+第二，目标点的临域查询（\$near),和范围查询(\$within)。
+临域查询的结果是按照目标点由远及近的方式，将集合xpoint的所有文档都返回，但也可以设置limit的值来限制返回的结果的数目。查询语句如下：
+
+\noindent > db.xpoint.find(\{''geom.coordinates'':\{''\$near'':[122,52]\}\}).limit(10)
+
+\noindent 则表示查询点[122,52]附近，由远及近的十个点。查询结果如图一所示：
+%------
+\begin{figure}[h]
+\begin{center}
+\includegraphics[angle=0,width=6cm]{pic//near.jpg}
+\includegraphics[angle=0,width=6cm]{pic//box.jpg}
+\caption{临域查询与矩形范围查询结果}
+\label{fig:9}
+\end{center}
+\end{figure}
+%------
+%------
+\begin{figure}[h]
+\begin{center}
+\includegraphics[angle=0,width=6cm]{pic//center.jpg}
+\includegraphics[angle=0,width=6cm]{pic//polygon.jpg}
+\caption{圆形与多边形查询结果}
+\label{fig:11}
+\end{center}
+\end{figure}
+%------
+MongoDB的范围查询操作支持的形状有矩形（\$box),圆形（\$center)，多边形（\$polygon）。所查询的范围，默认是包含边界的。
+ 查询一个矩形范围，需要指定矩形的左下角和右上角两个坐标点，如下：
+
+\noindent > box = [[80,40],[100,50]]\\
+> db.xqpoint.find(\{''geom.coordinates'':\{\$within:\{\$box:box\}\}\})
+
+查询结果如下图【】所示：
+
+查询一个圆形范围，需要指定圆心坐标和半径，查询代码如下：
+
+\noindent > center = [80,44]\\
+> radius =5\\
+> db.xqpoint.find(\{''geom.coordinates'':\{\$within:\{\$center:[center,radius]\}\}\})
+
+查询结果如下图所示
+
+    查询一个多边形范围，需要指定多边形的各个顶点，可以通过一个顶点数组或一系列点对象指定。其中，最后一个点是默认与第一个点连接的。如下：
+
+\noindent > polygon1 = [[75,35],[80,35],[80,45],[60,40]]\\
+> db.xqpoint.find(\{''geom.coordinates'':\{\$within:\{\$polygon:polygon1\}\}\})
+
+查询结果如下图所示
+
+
+
+
+
 
 
 
