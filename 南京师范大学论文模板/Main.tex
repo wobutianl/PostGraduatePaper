@@ -1,0 +1,41 @@
+\def\version{1.6}         % �ñ��������ģ���ļ��İ汾�ſ���
+\documentclass[12pt,a4paper,openany,twoside]{report}
+\usepackage{ctex}
+\def\useyap{true}         % �Ƿ�ʹ��Yap�Ŀ��� \def\useyap{false}
+\input{Setup/Packages}    % ���õĺ���
+\begin{document}
+%\begin{CJK*}{GBK}{song}
+\graphicspath{{Figures/}} % �������е�ͼ���ļ����� Figures �ļ�����
+\input{Setup/Definition}  % �ı���ʽ����
+\include{Body/Cover}                              % ����
+\hypersetup{CJKbookmarks=true}
+\pagenumbering{Roman}  \setcounter{page}{1}       % ҳ������ΪСд�������岢����Ϊ1
+\include{Body/AbstractinChinese}
+\include{Body/AbstractinEnglish}
+\addtocontents{toc}{\protect\vskip1\baselineskip} % ����Ŀ¼���ӿ���
+%\addtocontents{toe}{\protect\vskip1\baselineskip} % Ӣ��Ŀ¼���ӿ���
+\renewcommand{\baselinestretch}{1}
+\fontsize{12pt}{12pt}\selectfont \cleardoublepage
+%\pdfbookmark[0]{Ŀ¼}{mulu}
+\tableofcontents                                  % ��ʾ����Ŀ¼
+
+\clearpage
+% ���Ĳ���
+\sloppy                                         % ������Ӣ�Ļ��ŵĶ������⣬���������࣬������Ӱ������
+\defaultfont                                    % ��Ӧ��С�ĵı�׼�ֺ��� 12pt, �������������ô������޸�����Ҫ�����ĵĴ�С
+\pagenumbering{arabic}\setcounter{page}{1}      % ҳ������Ϊ��������岢����Ϊ1
+\include{Body/Preface}
+\include{Body/Chapter1}
+\include{Body/Chapter2}
+\defaultfont
+\phantomsection
+ \addtolength{\bibsep}{-0.8 em}
+\include{Body/Bibliography}                               % �ο�����
+\addtocontents{fen}{\protect\vskip1\baselineskip}
+\include{Body/Acknowledgements}                           % ��л
+% \appendix                         % ���½ڵĸ�¼����
+% \include{Body/AppA}               % ��¼A
+% \include{Body/AppB}               % ��¼B
+\clearpage
+%\end{CJK*}
+\end{document}

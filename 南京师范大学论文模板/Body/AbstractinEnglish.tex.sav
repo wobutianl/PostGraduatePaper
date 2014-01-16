@@ -1,0 +1,16 @@
+\defaultfont
+\BiAppendixChapter{\textbf{Abstract}}{}
+{
+In recent years, along with the in-depth development of geography,both in quantity and quality Geoscientific model resources has been greatly improved,As geography in mathematical language to describe the geological model,is the essence of geography,At the same time, along with the geography data access tools rich  and improvements .more convenient to get data .
+However only through model transformation  geographical data can be effective into useful information,
+Due to the Differences in the geographical data semantically and modeling environment,Caused a delay of application and reusable of geological model.
+How to structure the bridge between geological model and multi-source geological information,increasing geoscientific models and upgrade the data convert rates of be an  important issues.
+
+
+
+
+\\
+\\
+}
+%\vspace{10cm}
+\noindent{\textbf{Keywords:}} \quad{Sea Leavel Change, Regional Response, Model Integration and Simulation,Taihu Basin}

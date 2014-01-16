@@ -1,0 +1,99 @@
+% 定义封面
+\begin{titlepage}
+{\song\sihao 索取号：\underline{\makebox[4cm]{????}}}\hfill %
+{\song\sihao 密级：\underline{\makebox[4cm]{\hfill 公\quad
+开\hfill} }} \vspace{8mm}
+    \begin{center}
+    \includegraphics[width=85mm]{nnu1}\vspace{2mm}
+    \parbox[t][1cm][b]{\textwidth}{\erhao
+    \begin{center} {\hei\bf  硕\hspace{3mm}士\hspace{3mm}学\hspace{3mm}位\hspace{3mm}论\hspace{3mm}文 }\end{center} }
+\vspace{3mm}
+\begin{center}
+  \includegraphics[width=24mm]{nnu2}
+\end{center}
+\vspace{5mm}
+{{\hei\bf\erhao 面向未来海面上升影响预估的时空格局模拟研究-以长江三角洲地区为例\\}} \vspace{10mm}
+\renewcommand\baselinestretch{2.2}
+
+
+\small\normalsize \makebox[0.82cm]{}\begin{tabular}{cc}
+  % after \\\cline{2-2}: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \makebox[2.3cm]{\bf\song\sihao 研\hspace{0.2cm}究\hspace{0.2cm}生\quad ：}    &
+  \makebox[5cm]{\hei\sihao\hfill 朱\quad 晓林\hfill} \\%\cline{2-2}
+%--------------
+  \makebox[2.3cm]{\bf\song\sihao 指导教师\quad ：} &
+  \makebox[5cm]{\bf\song\sihao\hfill 袁林旺\quad 教授\hfill} \\%\cline{2-2}
+%--------------
+  \makebox[2.3cm]{\bf\song\sihao 培养单位\quad ：}    &
+ \makebox[5cm]{\bf\song\sihao\hfill 地理科学学院\hfill} \\%\cline{2-2}
+%--------------
+  \makebox[2cm]{\bf\song\sihao 一级学科\quad  ：} &
+  \makebox[5cm]{\hei\sihao\hfill 地理\quad 学\hfill}\\%\cline{2-2}
+  %--------------
+  \makebox[2cm]{\bf\song\sihao 二级学科\quad  ：} &
+  \makebox[5cm]{\hei\sihao\hfill 地图学与地理信息系统\hfill}\\%\cline{2-2}
+  %--------------
+  \makebox[2cm]{\bf\song\sihao 完成时间\quad  ：} &
+  \makebox[5cm]{\hei\sihao\hfill 2014年5月10日\hfill}\\%\cline{2-2}
+  %--------------
+  \makebox[2cm]{\bf\song\sihao 答辩时间\quad  ：} &
+  \makebox[5cm]{\hei\sihao\hfill 2014年5月30日\hfill}\\%\cline{2-2}
+\end{tabular}
+    \end{center}
+    %内封
+    \newpage
+    \thispagestyle{empty}
+    \begin{center}{\fs\bf\sihao\vspace{20mm}
+    硕\\士\\学\\位\\论\\文\\ \vspace{30mm} 地\\理\\学\\ \vspace{35mm}
+    朱\\
+    晓\\
+    林\\ \vspace{35mm}
+    南\\京\\师\\范\\大\\学}
+    \end{center}
+
+
+    \newpage
+    \thispagestyle{empty}
+
+
+
+\begin{center}
+{\erhao{\song{\bf {学位论文独创性声明}}}}
+\end{center}
+\renewcommand\baselinestretch{2.2}
+{\xiaosi{\song{\bf
+
+本人郑重声明：所提交的学位是本人在导师指导下进行的研究工作和取得的研究成果。
+本论文中除引文外，所有实验、数据和有关材料均是真实的。本论文中除引文和致谢的内容外，不
+包含其他人或其它机构已经发表或撰写过的研究成果。其他同志对本研究所做的贡献均已在论文中作了声明并表示了谢意。
+
+\vspace{10mm}
+\noindent
+学位论文作者签名：\hspace{5cm}	日 \quad     期：
+}}}
+
+
+
+
+
+
+
+\vspace*{2.0cm}
+\begin{center}
+{\erhao{\song{\bf 学位论文使用授权声明}}}
+\end{center}
+\renewcommand\baselinestretch{2.2}
+%\baselineskip 20mm
+{\xiaosi\song\bf
+
+研究生在校攻读学位期间论文工作的知识产权单位属南京师范大学。学校有权保存本学位论文的电子和纸质文档，可以借阅或上网公布本学位论文的部分或全部内容，可以采用影印、复印等手段保存、汇编本学位论文。学校可以向国家有关机关或机构送交论文的电子和纸质文档，允许论文被查阅和借阅。（保密论文在解密后遵守此规定）
+保密论文注释：本学位论文属于保密论文，保密期限为\quad\quad   年。
+\vspace{10mm}
+
+\noindent 学位论文作者签名：\hspace{4cm}	指导教师签名：
+
+\noindent 日 \hspace{2.55cm}         期：\hspace{4cm}	日 \hspace{1.7cm}       期：}
+
+\end{titlepage}
+
+\clearpage
